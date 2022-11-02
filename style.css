@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+body{
+  margin: 0;
+  display: block;
+ 
+}
+
+#info {
+	position: fixed;
+	 top: 50vh; 
+	width: auto;
+  left: 300px;
+  right: 300px;
+	text-align: center;
+	z-index: 100;
+	display:block;
+  /* font-weight: bold; */
+  font-size: 25px;
+  color: rgba(0, 0, 0, 0.801);
+  text-transform: uppercase;
+  font-family: 'Bangers', cursive;
+}
