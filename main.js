@@ -36,45 +36,43 @@ class World {
 
     // Scene
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.02);
 
-    // Lighting
-    this.sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    this.sunLight.position.set(10, 20, 10);
+    // Space background with stars
+    this.createStarfield();
+
+    // Lighting - more dramatic for space
+    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    this.sunLight.position.set(20, 30, 20);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.width = 2048;
     this.sunLight.shadow.mapSize.height = 2048;
-    this.sunLight.shadow.camera.far = 50;
+    this.sunLight.shadow.camera.far = 100;
     this.scene.add(this.sunLight);
 
-    this.ambientLight = new THREE.AmbientLight(0x8b9dc3, 0.4);
+    this.ambientLight = new THREE.AmbientLight(0x4a5f8f, 0.3);
     this.scene.add(this.ambientLight);
 
-    // Rim light for dramatic effect
-    this.rimLight = new THREE.DirectionalLight(0x6b7c9d, 0.5);
-    this.rimLight.position.set(-10, 5, -10);
-    this.scene.add(this.rimLight);
+    // Colored accent lights
+    this.accentLight1 = new THREE.PointLight(0x6b5fff, 0.8, 100);
+    this.accentLight1.position.set(-20, 10, -20);
+    this.scene.add(this.accentLight1);
 
-    // Controls
+    this.accentLight2 = new THREE.PointLight(0xff5f9e, 0.6, 100);
+    this.accentLight2.position.set(20, -10, 20);
+    this.scene.add(this.accentLight2);
+
+    // Controls - FREE MOVEMENT
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
-    this.controls.enablePan = false;
-    this.controls.minDistance = 10;
-    this.controls.maxDistance = 30;
-    this.controls.maxPolarAngle = Math.PI / 2;
-
-    // Skybox
-    this.loader = new THREE.CubeTextureLoader();
-    this.texture = this.loader.load([
-      './resources/posx.jpg',
-      './resources/negx.jpg',
-      './resources/posy.jpg',
-      './resources/negy.jpg',
-      './resources/posz.jpg',
-      './resources/negz.jpg',
-    ]);
-    this.scene.background = this.texture;
+    this.controls.dampingFactor = 0.08;
+    this.controls.enablePan = true; // Enable panning
+    this.controls.panSpeed = 1.5;
+    this.controls.rotateSpeed = 0.8;
+    this.controls.minDistance = 5;
+    this.controls.maxDistance = 100;
+    // Remove polar angle restriction for full freedom
+    this.controls.enableZoom = true;
+    this.controls.zoomSpeed = 1.2;
 
     // Create islands
     this.createIslands();
@@ -89,6 +87,63 @@ class World {
 
     // Start animation loop
     this.RAF();
+  }
+
+  createStarfield() {
+    // Create distant stars
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 3000;
+    const starPositions = new Float32Array(starCount * 3);
+    const starColors = new Float32Array(starCount * 3);
+
+    for (let i = 0; i < starCount; i++) {
+      const i3 = i * 3;
+
+      // Random position in sphere
+      const radius = 200 + Math.random() * 300;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+
+      starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+      starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      starPositions[i3 + 2] = radius * Math.cos(phi);
+
+      // Random star colors (white, blue, yellow tints)
+      const colorChoice = Math.random();
+      if (colorChoice < 0.6) {
+        // White stars
+        starColors[i3] = 1;
+        starColors[i3 + 1] = 1;
+        starColors[i3 + 2] = 1;
+      } else if (colorChoice < 0.8) {
+        // Blue stars
+        starColors[i3] = 0.7;
+        starColors[i3 + 1] = 0.8;
+        starColors[i3 + 2] = 1;
+      } else {
+        // Yellow stars
+        starColors[i3] = 1;
+        starColors[i3 + 1] = 0.9;
+        starColors[i3 + 2] = 0.7;
+      }
+    }
+
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+    const starMaterial = new THREE.PointsMaterial({
+      size: 2,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      sizeAttenuation: true
+    });
+
+    this.stars = new THREE.Points(starGeometry, starMaterial);
+    this.scene.add(this.stars);
+
+    // Add nebula background gradient
+    this.scene.background = new THREE.Color(0x0a0a1a);
   }
 
   createOverlays() {
@@ -135,31 +190,32 @@ class World {
   }
 
   createIslands() {
-    const islandPositions = [
-      { x: 0, y: 0, z: 0, name: 'About' },
-      { x: 20, y: 2, z: -10, name: 'Projects' },
-      { x: -20, y: -2, z: -10, name: 'Experience' },
-      { x: 0, y: 3, z: -25, name: 'Playground' }
+    const planetData = [
+      { x: 0, y: 0, z: 0, name: 'About', color: 0x4a90e2, size: 4, type: 'earth' },
+      { x: 25, y: 5, z: -15, name: 'Projects', color: 0xe74c3c, size: 3.5, type: 'mars' },
+      { x: -25, y: -5, z: -15, name: 'Experience', color: 0xf39c12, size: 5, type: 'jupiter' },
+      { x: 0, y: 8, z: -35, name: 'Playground', color: 0x9b59b6, size: 3, type: 'exotic' }
     ];
 
-    islandPositions.forEach((pos, index) => {
-      const island = this.createIsland(pos, index);
-      this.islands.push(island);
-      this.scene.add(island.group);
+    planetData.forEach((data, index) => {
+      const planet = this.createPlanet(data, index);
+      this.islands.push(planet);
+      this.scene.add(planet.group);
     });
   }
 
-  createIsland(position, index) {
+  createPlanet(data, index) {
     const group = new THREE.Group();
-    group.position.set(position.x, position.y, position.z);
+    group.position.set(data.x, data.y, data.z);
 
-    // Island base - geometric crystal shape
-    const geometry = new THREE.OctahedronGeometry(3, 0);
+    // Planet sphere with detailed surface
+    const geometry = new THREE.SphereGeometry(data.size, 64, 64);
     const material = new THREE.MeshStandardMaterial({
-      color: new THREE.Color().setHSL(index * 0.25, 0.6, 0.5),
-      roughness: 0.3,
-      metalness: 0.7,
-      flatShading: true
+      color: data.color,
+      roughness: 0.8,
+      metalness: 0.2,
+      emissive: data.color,
+      emissiveIntensity: 0.1
     });
 
     const mesh = new THREE.Mesh(geometry, material);
@@ -167,63 +223,80 @@ class World {
     mesh.receiveShadow = true;
     group.add(mesh);
 
-    // Wireframe overlay
-    const wireframe = new THREE.WireframeGeometry(geometry);
-    const line = new THREE.LineSegments(wireframe);
-    line.material.color.setHex(0xffffff);
-    line.material.opacity = 0.2;
-    line.material.transparent = true;
-    group.add(line);
+    // Atmosphere glow
+    const atmosphereGeometry = new THREE.SphereGeometry(data.size * 1.15, 32, 32);
+    const atmosphereMaterial = new THREE.MeshBasicMaterial({
+      color: data.color,
+      transparent: true,
+      opacity: 0.15,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending
+    });
+    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+    group.add(atmosphere);
 
-    // Particle system around island
-    const particleCount = 50;
+    // Orbital ring (for some planets)
+    if (data.type === 'jupiter' || data.type === 'exotic') {
+      const ringGeometry = new THREE.RingGeometry(data.size * 1.4, data.size * 1.8, 64);
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: data.color,
+        transparent: true,
+        opacity: 0.4,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.rotation.x = Math.PI / 2 + 0.3;
+      group.add(ring);
+    }
+
+    // Orbiting particles (moons/debris)
+    const particleCount = 100;
     const particleGeometry = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
-    const particleVelocities = [];
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
-      const radius = 4 + Math.random() * 2;
+      const orbitRadius = data.size * (1.5 + Math.random() * 1.5);
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
+      const phi = (Math.random() - 0.5) * 0.5;
 
-      particlePositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
-      particlePositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      particlePositions[i3 + 2] = radius * Math.cos(phi);
-
-      particleVelocities.push({
-        theta: Math.random() * 0.02,
-        phi: Math.random() * 0.01
-      });
+      particlePositions[i3] = orbitRadius * Math.cos(theta);
+      particlePositions[i3 + 1] = orbitRadius * Math.sin(phi);
+      particlePositions[i3 + 2] = orbitRadius * Math.sin(theta);
     }
 
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 
     const particleMaterial = new THREE.PointsMaterial({
-      color: new THREE.Color().setHSL(index * 0.25, 0.7, 0.6),
-      size: 0.1,
+      color: 0xffffff,
+      size: 0.15,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending
     });
 
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     group.add(particles);
 
-    // Floating animation
-    const floatSpeed = 0.5 + Math.random() * 0.5;
-    const floatOffset = Math.random() * Math.PI * 2;
+    // Point light emanating from planet
+    const planetLight = new THREE.PointLight(data.color, 0.5, data.size * 10);
+    planetLight.position.set(0, 0, 0);
+    group.add(planetLight);
+
+    // Animation parameters
+    const rotationSpeed = 0.001 + Math.random() * 0.002;
+    const orbitSpeed = 0.0005 + Math.random() * 0.001;
 
     return {
       group,
       mesh,
-      wireframe: line,
+      atmosphere,
       particles,
-      particleVelocities,
-      position,
-      name: position.name,
-      floatSpeed,
-      floatOffset,
+      position: data,
+      name: data.name,
+      rotationSpeed,
+      orbitSpeed,
       index
     };
   }
@@ -238,22 +311,35 @@ class World {
     requestAnimationFrame(() => {
       const time = performance.now() * 0.001;
 
-      // Animate islands
-      this.islands.forEach(island => {
-        island.group.rotation.y += 0.005;
-        island.group.position.y = island.position.y + Math.sin(time * island.floatSpeed + island.floatOffset) * 0.5;
+      // Animate planets
+      this.islands.forEach(planet => {
+        // Planet rotation
+        planet.mesh.rotation.y += planet.rotationSpeed;
 
-        // Animate particles
-        if (island.particles) {
-          island.particles.rotation.y += 0.003;
-          const positions = island.particles.geometry.attributes.position.array;
-          for (let i = 0; i < positions.length / 3; i++) {
-            const i3 = i * 3;
-            positions[i3 + 1] += Math.sin(time + i) * 0.01;
-          }
-          island.particles.geometry.attributes.position.needsUpdate = true;
+        // Atmosphere rotation (slightly different speed)
+        if (planet.atmosphere) {
+          planet.atmosphere.rotation.y -= planet.rotationSpeed * 0.5;
+        }
+
+        // Gentle orbital drift
+        const drift = Math.sin(time * planet.orbitSpeed) * 0.3;
+        planet.group.position.y = planet.position.y + drift;
+
+        // Rotate orbital particles
+        if (planet.particles) {
+          planet.particles.rotation.y += 0.002;
+          planet.particles.rotation.z += 0.001;
         }
       });
+
+      // Gentle starfield rotation
+      if (this.stars) {
+        this.stars.rotation.y += 0.0001;
+      }
+
+      // Animate accent lights
+      this.accentLight1.intensity = 0.6 + Math.sin(time * 0.5) * 0.2;
+      this.accentLight2.intensity = 0.4 + Math.cos(time * 0.7) * 0.2;
 
       // Check for hover
       this.raycaster.setFromCamera(this.mouse, this.camera);
