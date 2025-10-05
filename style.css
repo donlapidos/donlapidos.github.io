@@ -36,18 +36,21 @@ body {
 }
 
 .name {
-  font-size: clamp(3rem, 10vw, 8rem);
-  font-weight: 900;
+  font-family: 'Satisfy', cursive;
+  font-size: clamp(4rem, 12vw, 10rem);
+  font-weight: 400;
   color: #ffffff;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.05em;
   margin: 0;
   opacity: 0;
-  animation: fadeInUp 1.5s ease forwards;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #ffffff 0%, #8b9dc3 100%);
+  animation: fadeInUp 1.5s ease forwards, nameGlow 3s ease-in-out infinite;
+  text-transform: none;
+  background: linear-gradient(135deg, #ffffff 0%, #a8c0ff 50%, #ff9a9e 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(168, 192, 255, 0.5));
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
 }
 
 .hint {
@@ -96,6 +99,15 @@ body {
   }
   50% {
     opacity: 1;
+  }
+}
+
+@keyframes nameGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(168, 192, 255, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 40px rgba(255, 154, 158, 0.8));
   }
 }
 

@@ -26,13 +26,13 @@ class World {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.container.appendChild(this.renderer.domElement);
 
-    // Camera
+    // Camera - positioned away from all planets for overview
     const fov = 60;
     const aspect = window.innerWidth / window.innerHeight;
     const near = 0.1;
     const far = 1000;
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this.camera.position.set(0, 5, 15);
+    this.camera.position.set(0, 20, 50); // Further back and higher for full view
 
     // Scene
     this.scene = new THREE.Scene();
@@ -61,18 +61,35 @@ class World {
     this.accentLight2.position.set(20, -10, 20);
     this.scene.add(this.accentLight2);
 
-    // Controls - FREE MOVEMENT
+    // Controls - COMPLETELY FREE MOVEMENT
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
-    this.controls.enablePan = true; // Enable panning
-    this.controls.panSpeed = 1.5;
+
+    // Pan settings
+    this.controls.enablePan = true;
+    this.controls.panSpeed = 2.0;
+    this.controls.screenSpacePanning = true; // Pan in screen space, not world space
+
+    // Rotation settings
     this.controls.rotateSpeed = 0.8;
-    this.controls.minDistance = 5;
-    this.controls.maxDistance = 100;
-    // Remove polar angle restriction for full freedom
+    this.controls.enableRotate = true;
+
+    // Zoom settings
     this.controls.enableZoom = true;
-    this.controls.zoomSpeed = 1.2;
+    this.controls.zoomSpeed = 1.5;
+    this.controls.minDistance = 5;
+    this.controls.maxDistance = 200;
+
+    // NO target lock - completely free
+    this.controls.target.set(0, 0, 0); // Initial look point
+    this.controls.autoRotate = false;
+
+    // Remove ALL angle restrictions
+    this.controls.minPolarAngle = 0; // Allow full vertical rotation
+    this.controls.maxPolarAngle = Math.PI; // Allow full vertical rotation
+    this.controls.minAzimuthAngle = -Infinity; // Allow full horizontal rotation
+    this.controls.maxAzimuthAngle = Infinity; // Allow full horizontal rotation
 
     // Create islands
     this.createIslands();
@@ -191,10 +208,10 @@ class World {
 
   createIslands() {
     const planetData = [
-      { x: 0, y: 0, z: 0, name: 'About', color: 0x4a90e2, size: 4, type: 'earth' },
-      { x: 25, y: 5, z: -15, name: 'Projects', color: 0xe74c3c, size: 3.5, type: 'mars' },
-      { x: -25, y: -5, z: -15, name: 'Experience', color: 0xf39c12, size: 5, type: 'jupiter' },
-      { x: 0, y: 8, z: -35, name: 'Playground', color: 0x9b59b6, size: 3, type: 'exotic' }
+      { x: -15, y: 0, z: -10, name: 'About', color: 0x4a90e2, size: 4, type: 'earth' },
+      { x: 20, y: 8, z: 5, name: 'Projects', color: 0xe74c3c, size: 3.5, type: 'mars' },
+      { x: -20, y: -8, z: 15, name: 'Experience', color: 0xf39c12, size: 5, type: 'jupiter' },
+      { x: 15, y: 5, z: -20, name: 'Playground', color: 0x9b59b6, size: 3, type: 'exotic' }
     ];
 
     planetData.forEach((data, index) => {
