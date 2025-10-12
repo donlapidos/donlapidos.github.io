@@ -22,11 +22,24 @@
             height: 100vh !important;
             max-width: 100%;
             max-height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .black-box {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30vh;
+            background: #000;
+            z-index: 10;
         }
     </style>
   </head>
   <body>
     <div data-us-project="qgMorzrbEZcuZxodfGqD"></div>
+    <div class="black-box"></div>
     <script type="text/javascript">!function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.33/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();</script>
   </body>
 </html>
