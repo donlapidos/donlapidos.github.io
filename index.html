@@ -11,26 +11,22 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
         }
-        #app {
-            width: 100%;
-            height: 100%;
+
+        [data-us-project] {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100%;
+            max-height: 100%;
         }
     </style>
   </head>
   <body>
-    <div id="app"></div>
-    <script src="https://cdn.unicorn.studio/v1.4.1/unicornStudio.umd.js"></script>
-    <script>
-        UnicornStudio.addScene({
-            elementId: 'app',
-            projectId: 'qgMorzrbEZcuZxodfGqD',
-            fps: 60,
-            scale: 1,
-            dpi: 1,
-            lazyload: false,
-            production: true
-        });
-    </script>
+    <div data-us-project="qgMorzrbEZcuZxodfGqD"></div>
+    <script type="text/javascript">!function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.33/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();</script>
   </body>
 </html>
